@@ -15,7 +15,7 @@ db.init_app(app)
 
 @app.route('/')
 def home():
-    return ''
+    return '<h1>This is landing pasge</h1>'
 
 
 if __name__ == '__main__':
