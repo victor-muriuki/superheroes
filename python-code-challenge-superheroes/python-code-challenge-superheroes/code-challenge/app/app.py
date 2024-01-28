@@ -46,7 +46,7 @@ def get_hero(hero_id):
     if hero:
         return jsonify({"id": hero.id, "name": hero.name})
     else:
-        return jsonify({"error": f"Hero with id {hero_id} not found"}), 404
+        return jsonify({"error": f"Hero with id {hero_id} not found"})
 
 @app.route('/powers', methods=['GET'])
 def get_powers():
@@ -60,7 +60,7 @@ def get_power(power_id):
     if power:
         return jsonify({"id": power.id, "description": power.description})
     else:
-        return jsonify({"error": f"Power with id {power_id} not found"}), 404
+        return jsonify({"error": f"Power with id {power_id} not found"})
 
 if __name__ == '__main__':
     app.run(port=5555)

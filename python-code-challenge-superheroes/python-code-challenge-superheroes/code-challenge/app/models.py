@@ -24,7 +24,8 @@ class HeroPower(db.Model):
 
      #define relationships
     hero = db.relationship('Hero', backref='hero_powers')
-    power = db.relationship('Power', backref='hero_powers')
+    power_relation = db.relationship('Power', backref='hero_powers_related') 
+
     
 class Power(db.Model):
     __tablename__ = 'power'
@@ -35,7 +36,8 @@ class Power(db.Model):
     description = db.Column(db.String(150), nullable = False)
     
     #relationship
-    hero_powers = db.relationship('HeroPower', backref='power')
+    hero_powers_relation = db.relationship('HeroPower', backref='power')
+
 
     
 
