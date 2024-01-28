@@ -7,23 +7,25 @@ class Hero(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    Attributes = db.Column(db.String)
+    attributes = db.Column(db.String)
 
-class Hero_Power(db.Model):
+class HeroPower(db.Model):
     __tablename__ = 'hero_power'
 
     id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.String)
-    
+    hero_id = db.Column(db.Integer, db.ForeignKey('hero.id'))
+    power_id = db.Column(db.Integer, db.ForeignKey('power.id'))
+    strength = db.Column(db.Integer)
+
+    # Define relationships
+    hero = db.relationship('Hero', backref='hero_powers')
+    power = db.relationship('Power', backref='hero_powers')
+
 class Power(db.Model):
     __tablename__ = 'power'
 
-
     id = db.Column(db.Integer, primary_key=True)
-    hero_id = db.Column(db.Integer)
-    power_id = db.Column(db.Integer)
-    
+    description = db.Column(db.String)
 
-    
-
-# add any models you may need. 
+    # Define relationship
+    hero_powers = db.relationship('HeroPower', backref='power')
