@@ -2,6 +2,8 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+#create tabels
+
 class Hero(db.Model):
     __tablename__ = 'hero'
 
@@ -17,15 +19,20 @@ class HeroPower(db.Model):
     power_id = db.Column(db.Integer, db.ForeignKey('power.id'))
     strength = db.Column(db.Integer)
 
-    # Define relationships
+     #define relationships
     hero = db.relationship('Hero', backref='hero_powers')
     power = db.relationship('Power', backref='hero_powers')
-
+    
 class Power(db.Model):
     __tablename__ = 'power'
 
+
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String)
-
-    # Define relationship
+    
+    #relationship
     hero_powers = db.relationship('HeroPower', backref='power')
+
+    
+
+# add any models you may need. 
