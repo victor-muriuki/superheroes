@@ -1,4 +1,7 @@
+# models.py
+
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Nullable
 
 db = SQLAlchemy()
 
@@ -8,16 +11,16 @@ class Hero(db.Model):
     __tablename__ = 'hero'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    attributes = db.Column(db.String)
+    name = db.Column(db.String(50), nullable=False)
+    
 
 class HeroPower(db.Model):
     __tablename__ = 'hero_power'
 
     id = db.Column(db.Integer, primary_key=True)
-    hero_id = db.Column(db.Integer, db.ForeignKey('hero.id'))
-    power_id = db.Column(db.Integer, db.ForeignKey('power.id'))
-    strength = db.Column(db.Integer)
+    hero_id = db.Column(db.Integer, db.ForeignKey('hero.id'), nullable=False)
+    power_id = db.Column(db.Integer, db.ForeignKey('power.id'), nullable=False)
+    strength = db.Column(db.String(20), nullable=False)
 
      #define relationships
     hero = db.relationship('Hero', backref='hero_powers')
@@ -28,7 +31,8 @@ class Power(db.Model):
 
 
     id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.String)
+    name = db.Column(db.String(50), nullable = False)
+    description = db.Column(db.String(150), nullable = False)
     
     #relationship
     hero_powers = db.relationship('HeroPower', backref='power')
