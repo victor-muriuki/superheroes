@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 
 function HeroPowerForm() {
   const [heroes, setHeroes] = useState([]);
@@ -8,7 +8,7 @@ function HeroPowerForm() {
   const [powerId, setPowerId] = useState("");
   const [strength, setStrength] = useState("");
   const [formErrors, setFormErrors] = useState([]);
-  const history = useHistory();
+  const history = useNavigate();
 
   useEffect(() => {
     fetch("/heroes")

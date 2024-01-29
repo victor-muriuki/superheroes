@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useHistory } from "react-router";
+import { useParams, useNavigate } from "react-router";
 
 function PowerEditForm() {
   const [{ data: power, errors, status }, setPower] = useState({
@@ -8,7 +8,7 @@ function PowerEditForm() {
     status: "pending",
   });
   const [description, setDescription] = useState("");
-  const history = useHistory();
+  const history = useNavigate();
   const { id } = useParams();
 
   useEffect(() => {
