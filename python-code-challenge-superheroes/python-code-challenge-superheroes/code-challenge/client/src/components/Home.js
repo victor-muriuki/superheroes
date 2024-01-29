@@ -6,9 +6,15 @@ function Home() {
 
   useEffect(() => {
     fetch("/heroes")
-      .then((r) => r.json())
-      .then(setHeros);
-  }, []);
+    .then((r) => {
+      if (!r.ok) {
+        throw new Error(`HTTP error! Status: ${r.status}`);
+      }
+      return r.json();
+    })
+    .then(setHeros)
+    .catch((error) => console.error("Error fetching heroes:", error));
+}, []);
 
   return (
     <section>
@@ -16,7 +22,7 @@ function Home() {
       <ul>
         {heros.map((hero) => (
           <li key={hero.id}>
-            <Link to={`/heroes/${hero.id}`}>{hero.super_name}</Link>
+            <Link to={`/heroes/${hero.id}`}>{hero.name}</Link>
           </li>
         ))}
       </ul>
