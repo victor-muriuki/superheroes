@@ -1,5 +1,5 @@
 # seeds.py
-from app.models import db, Power, Hero, HeroPower
+from ..app.models import db, Power, Hero, HeroPower
 from random import randint, choice
 
 def seed_powers():
