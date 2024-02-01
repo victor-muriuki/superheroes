@@ -2,25 +2,37 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 function Home() {
-  const [heros, setHeros] = useState([]);
+  const [heroes, setHeroes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("/heroes")
-    .then((r) => {
-      if (!r.ok) {
-        throw new Error(`HTTP error! Status: ${r.status}`);
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:5555/heroes"); 
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setHeroes(data);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
-      return r.json();
-    })
-    .then(setHeros)
-    .catch((error) => console.error("Error fetching heroes:", error));
-}, []);
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <section>
       <h2>All Heroes</h2>
+      {loading && <p>Loading...</p>}
+      {error && <p>Error: {error}</p>}
       <ul>
-        {heros.map((hero) => (
+        {heroes.map((hero) => (
           <li key={hero.id}>
             <Link to={`/heroes/${hero.id}`}>{hero.name}</Link>
           </li>

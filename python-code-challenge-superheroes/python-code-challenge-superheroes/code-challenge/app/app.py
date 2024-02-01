@@ -1,6 +1,6 @@
 #app.py
 
-
+from flask_cors import CORS
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
 from flask_restful import Api
@@ -9,6 +9,7 @@ from models import db, Hero, HeroPower, Power
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+CORS(app)
 
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -16,9 +17,9 @@ api = Api(app)
 
 
 
-@app.route('/')
-def home():
-    return '<h1>This is landing pasge</h1>'
+# @app.route('/')
+# def home():
+#     return '<h1>This is landing pasge</h1>'
 
 @app.route('/hero_powers', methods=['POST'])
 def create_hero_power():
