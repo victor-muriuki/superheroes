@@ -16,9 +16,17 @@ api = Api(app)
 
 
 
-@app.route('/')
-def home():
-    return '<h1>This is landing pasge</h1>'
+# @app.route('/')
+# def home():
+#     return '<h1>This is landing pasge</h1>'
+@app.route('/heroes/<int:hero_id>', methods=['GET'])
+def get_hero(hero_id):
+    hero = Hero.query.get(hero_id)
+    if hero:
+        powers = [{"id": power.id, "name": power.name, "description": power.description} for power in hero.powers]
+        return jsonify({"id": hero.id, "name": hero.name, "powers": powers})
+    else:
+        return jsonify({"error": f"Hero with id {hero_id} not found"})
 
 @app.route('/hero_powers', methods=['POST'])
 def create_hero_power():
@@ -94,14 +102,7 @@ def get_powers():
     return jsonify({"powers": powers_data})
 
 
-@app.route('/heroes/<int:hero_id>', methods=['GET'])
-def get_hero(hero_id):
-    hero = Hero.query.get(hero_id)
-    if hero:
-        powers = [{"id": power.id, "name": power.name, "description": power.description} for power in hero.powers]
-        return jsonify({"id": hero.id, "name": hero.name, "powers": powers})
-    else:
-        return jsonify({"error": f"Hero with id {hero_id} not found"})
+
     
 
 if __name__ == '__main__':

@@ -34,5 +34,5 @@ if __name__ == '__main__':
     from app import app, db
     with app.app_context():
         # Uncomment the line below to create the database tables if they don't exist
-        # db.create_all()
+        db.create_all()
         seed_data()
