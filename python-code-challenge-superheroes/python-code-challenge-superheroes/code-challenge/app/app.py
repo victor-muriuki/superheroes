@@ -16,9 +16,10 @@ api = Api(app)
 
 
 
-# @app.route('/')
-# def home():
-#     return '<h1>This is landing pasge</h1>'
+@app.route('/heroes')
+def home():
+    return '<h1>This is landing pasge</h1>'
+
 @app.route('/heroes/<int:hero_id>', methods=['GET'])
 def get_hero(hero_id):
     hero = Hero.query.get(hero_id)

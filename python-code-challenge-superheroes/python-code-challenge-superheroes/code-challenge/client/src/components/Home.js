@@ -9,7 +9,7 @@ function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:5555/heroes"); 
+        const response = await fetch("/heroes"); 
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
