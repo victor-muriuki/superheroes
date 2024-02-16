@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 function HeroPowerForm() {
@@ -53,12 +53,20 @@ function HeroPowerForm() {
         value={powerId}
         onChange={(e) => setPowerId(e.target.value)}
       >
-        <option value="">Select a power</option>
-        {powers.map((power) => (
-          <option key={power.id} value={power.id}>
-            {power.name}
+        {Array.isArray(powers) && powers.length > 0 ? (
+          <>
+            <option value="">Select a power</option>
+            {powers.map((power) => (
+              <option key={power.id} value={power.id}>
+                {power.name}
+              </option>
+            ))}
+          </>
+        ) : (
+          <option value="" disabled>
+            Loading Powers...
           </option>
-        ))}
+        )}
       </select>
       <label htmlFor="hero_id">Hero:</label>
       <select
@@ -82,13 +90,12 @@ function HeroPowerForm() {
         value={strength}
         onChange={(e) => setStrength(e.target.value)}
       />
-      {formErrors.length > 0
-        ? formErrors.map((err) => (
-            <p key={err} style={{ color: "red" }}>
-              {err}
-            </p>
-          ))
-        : null}
+      {formErrors.length > 0 &&
+        formErrors.map((err) => (
+          <p key={err} style={{ color: "red" }}>
+            {err}
+          </p>
+        ))}
       <button type="submit">Add Hero Power</button>
     </form>
   );
