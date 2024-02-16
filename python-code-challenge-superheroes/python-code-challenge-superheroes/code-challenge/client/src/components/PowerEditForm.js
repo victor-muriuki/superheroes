@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function PowerEditForm() {
   const [{ data: power, errors, status }, setPower] = useState({
     data: null,
-    errors: [],
+    errors: [], // Initialize errors to an empty array
     status: "pending",
   });
   const [description, setDescription] = useState("");
@@ -60,7 +61,7 @@ function PowerEditForm() {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
-      {errors.length > 0
+      {errors && errors.length > 0  // Add a null check before accessing the length property
         ? errors.map((err) => (
             <p key={err} style={{ color: "red" }}>
               {err}

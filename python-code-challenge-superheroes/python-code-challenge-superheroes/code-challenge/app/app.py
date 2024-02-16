@@ -37,10 +37,13 @@ class HeroResource(Resource):
 
 class HeroPowerResource(Resource):
     def post(self):
-        args = hero_power_parser.parse_args()
-        hero_id = args['hero_id']
-        power_id = args['power_id']
-        strength = args['strength']
+        data = request.get_json()
+        hero_id = data.get('hero_id')
+        power_id = data.get('power_id')
+        strength = data.get('strength')
+
+        if None in [hero_id, power_id, strength]:
+            return jsonify({"error": "Incomplete data provided"}), 400
 
         hero = Hero.query.get(hero_id)
         power = Power.query.get(power_id)
@@ -62,6 +65,7 @@ class HeroPowerResource(Resource):
             db.session.rollback()
             return jsonify({"error": f"Failed to create HeroPower. {str(e)}"}), 500
 
+
 class PowerResource(Resource):
     def get(self, power_id):
         power = Power.query.get(power_id)
@@ -70,6 +74,29 @@ class PowerResource(Resource):
         else:
             return jsonify({"error": f"Power with id {power_id} not found"}), 404
 
+    def patch(self, power_id):
+        power = Power.query.get(power_id)
+        if not power:
+            return jsonify({"error": f"Power with id {power_id} not found"}), 404
+
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided in request body"}), 400
+
+        # Update power attributes if they exist in the request data
+        if 'name' in data:
+            power.name = data['name']
+        if 'description' in data:
+            power.description = data['description']
+
+        try:
+            # Commit changes to the database
+            db.session.commit()
+            return jsonify({"message": f"Power with id {power_id} updated successfully"}), 200
+        except Exception as e:
+            # Rollback changes if an error occurs
+            db.session.rollback()
+            return jsonify({"error": f"Failed to update Power with id {power_id}. {str(e)}"}), 500
 class PowersResource(Resource):
     def get(self):
         powers = Power.query.all()
@@ -78,7 +105,7 @@ class PowersResource(Resource):
 
 
 api.add_resource(HeroListResource, '/heroes')
-api.add_resource(HeroResource, '/heroes/<int:hero_id>')
+api.add_resource(HeroResource, '/heroes/<int:hero_id>') 
 api.add_resource(HeroPowerResource, '/hero_powers')
 api.add_resource(PowerResource, '/powers/<int:power_id>')
 api.add_resource(PowersResource, '/powers')
