@@ -1,38 +1,76 @@
-# seed.py
+from models import db, Power, Hero, HeroPower
+from random import randint, choice
+from sqlalchemy import func
+from flask import Flask
 
-from models import db, Hero, Power, HeroPower
+# Create a Flask application
+app = Flask(__name__)
 
-def seed_data():
-    # Create Powers
-    power1 = Power(name='Flight', description='Can fly in the sky')
-    power2 = Power(name='Super Strength', description='Has incredible strength')
-    power3 = Power(name='Web-slinging', description='Can swing between buildings using webs')
+# Configure Flask application
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # Add Powers to the database
-    db.session.add_all([power1, power2, power3])
-    db.session.commit()
+# Bind the Flask application to the SQLAlchemy database instance
+db.init_app(app)
 
-    # Create Heroes
-    hero1 = Hero(name='Superman', super_name='Clark Kent')
-    hero2 = Hero(name='Spiderman', super_name='Peter Parker')
-
-    # Add Heroes to the database
-    db.session.add_all([hero1, hero2])
-    db.session.commit()
-
-    # Create HeroPower relationships
-    hero_power1 = HeroPower(hero_id=hero1.id, power_id=power1.id, strength='Strong')
-    hero_power2 = HeroPower(hero_id=hero1.id, power_id=power2.id, strength='Average')
-    hero_power3 = HeroPower(hero_id=hero2.id, power_id=power3.id, strength='Strong')
-
-    # Add HeroPower relationships to the database
-    db.session.add_all([hero_power1, hero_power2, hero_power3])
-    db.session.commit()
-
-if __name__ == '__main__':
-    # Make sure to initialize your Flask app and database before running the seed file
-    from app import app, db
+def seed_powers():
     with app.app_context():
-        # Uncomment the line below to create the database tables if they don't exist
-        db.create_all()
-        seed_data()
+        print("🦸‍♀️ Seeding powers...")
+        powers_data = [
+            {"name": "super strength", "description": "gives the wielder super-human strengths"},
+            {"name": "flight", "description": "gives the wielder the ability to fly through the skies at supersonic speed"},
+            {"name": "super human senses", "description": "allows the wielder to use her senses at a super-human level"},
+            {"name": "elasticity", "description": "can stretch the human body to extreme lengths"}
+        ]
+
+        for power_data in powers_data:
+            power = Power(**power_data)
+            db.session.add(power)
+        
+        db.session.commit()
+        print("🦸‍♀️ Powers seeded!")
+
+def seed_heroes():
+    with app.app_context():
+        print("🦸‍♀️ Seeding heroes...")
+        heroes_data = [
+            {"name": "Kamala Khan", "super_name": "Ms. Marvel"},
+            {"name": "Doreen Green", "super_name": "Squirrel Girl"},
+            {"name": "Gwen Stacy", "super_name": "Spider-Gwen"},
+            {"name": "Janet Van Dyne", "super_name": "The Wasp"},
+            {"name": "Wanda Maximoff", "super_name": "Scarlet Witch"},
+            {"name": "Carol Danvers", "super_name": "Captain Marvel"},
+            {"name": "Jean Grey", "super_name": "Dark Phoenix"},
+            {"name": "Ororo Munroe", "super_name": "Storm"},
+            {"name": "Kitty Pryde", "super_name": "Shadowcat"},
+            {"name": "Elektra Natchios", "super_name": "Elektra"}
+        ]
+
+        for hero_data in heroes_data:
+            hero = Hero(**hero_data)
+            db.session.add(hero)
+
+        db.session.commit()
+        print("🦸‍♀️ Heroes seeded!")
+
+def add_powers_to_heroes():
+    with app.app_context():
+        print("🦸‍♀️ Adding powers to heroes...")
+        strengths = ["Strong", "Weak", "Average"]
+
+        for hero in Hero.query.all():
+            for _ in range(randint(1, 3)):
+                power = Power.query.order_by(func.random()).first()  # Get a random power
+                strength = choice(strengths)
+                
+                hero_power = HeroPower(hero=hero, power=power, strength=strength)
+                db.session.add(hero_power)
+
+        db.session.commit()
+        print("🦸‍♀️ Done seeding!")
+
+# Ensure the script is run only when executed directly, not when imported as a module
+if __name__ == "__main__":
+    seed_powers()
+    seed_heroes()
+    add_powers_to_heroes()

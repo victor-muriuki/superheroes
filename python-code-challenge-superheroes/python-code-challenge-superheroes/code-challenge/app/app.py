@@ -1,8 +1,8 @@
-#app.py
-from flask_cors import CORS
 from flask import Flask, jsonify, request
+from flask_restful import Api, Resource, reqparse
+from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_restful import Api
+from flask_cors import CORS
 from models import db, Hero, HeroPower, Power
 
 app = Flask(__name__)
@@ -14,100 +14,74 @@ db.init_app(app)
 migrate = Migrate(app, db)
 api = Api(app)
 
+# Define request parser for POST requests
+hero_power_parser = reqparse.RequestParser()
+hero_power_parser.add_argument('hero_id', type=int, required=True, help="Hero ID is required")
+hero_power_parser.add_argument('power_id', type=int, required=True, help="Power ID is required")
+hero_power_parser.add_argument('strength', type=str, required=True, choices=('Strong', 'Weak', 'Average'), help="Strength must be one of 'Strong', 'Weak', 'Average'")
 
+class HeroListResource(Resource):
+    def get(self):
+        heroes = Hero.query.all()
+        hero_list = [{"id": hero.id, "name": hero.name, "super_name": hero.super_name} for hero in heroes]
+        return jsonify(hero_list)
 
-@app.route('/heroes')
-def home():
-    return '<h1>This is landing pasge</h1>'
+class HeroResource(Resource):
+    def get(self, hero_id):
+        hero = Hero.query.get(hero_id)
+        if hero:
+            powers = [{"id": power.id, "name": power.name, "description": power.description} for power in hero.powers]
+            return jsonify({"id": hero.id, "name": hero.name, "powers": powers})
+        else:
+            return jsonify({"error": f"Hero with id {hero_id} not found"})
 
-@app.route('/heroes/<int:hero_id>', methods=['GET'])
-def get_hero(hero_id):
-    hero = Hero.query.get(hero_id)
-    if hero:
-        powers = [{"id": power.id, "name": power.name, "description": power.description} for power in hero.powers]
-        return jsonify({"id": hero.id, "name": hero.name, "powers": powers})
-    else:
-        return jsonify({"error": f"Hero with id {hero_id} not found"})
+class HeroPowerResource(Resource):
+    def post(self):
+        args = hero_power_parser.parse_args()
+        hero_id = args['hero_id']
+        power_id = args['power_id']
+        strength = args['strength']
 
-@app.route('/hero_powers', methods=['POST'])
-def create_hero_power():
-    data = request.json
-    hero_id = data.get('hero_id')
-    power_id = data.get('power_id')
-    strength = data.get('strength')
+        hero = Hero.query.get(hero_id)
+        power = Power.query.get(power_id)
 
-    if not all([hero_id, power_id, strength]):
-        return jsonify({"error": "Missing required fields"})
+        if not hero or not power:
+            return jsonify({"error": "Hero or Power not found"}), 404
 
-    hero = Hero.query.get(hero_id)
-    power = Power.query.get(power_id)
-
-    if not hero or not power:
-        return jsonify({"error": "Hero or Power not found"})
-
-    if strength not in ['Strong', 'Weak', 'Average']:
-        return jsonify({"error": "Invalid strength value. Must be one of 'Strong', 'Weak', 'Average'"})
-
-    hero_power = HeroPower(hero_id=hero_id, power_id=power_id, strength=strength)
-    db.session.add(hero_power)
-
-    try:
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": f"Failed to create HeroPower. {str(e)}"})
-
-    powers = [{"id": p.id, "name": p.name, "description": p.description} for p in hero.powers]
-    return jsonify({
-        "message": "HeroPower created successfully",
-        "hero": {"id": hero.id, "name": hero.name, "powers": powers}
-    })
-
-
-@app.route('/powers/<int:power_id>', methods=['PATCH'])
-def update_power(power_id):
-    power = Power.query.get(power_id)
-
-    if not power:
-        return jsonify({"error": f"Power with id {power_id} not found"}), 404
-
-    data = request.json
-    new_description = data.get('description')
-
-    if new_description:
-        power.description = new_description
+        hero_power = HeroPower(hero_id=hero_id, power_id=power_id, strength=strength)
+        db.session.add(hero_power)
 
         try:
             db.session.commit()
-            return jsonify({"message": "Power description updated successfully", "power": {"id": power.id, "description": power.description}})
-        except ValueError as e:
-            return jsonify({"error": str(e)})
-    else:
-        return jsonify({"error": "Invalid request data"})
+            powers = [{"id": p.id, "name": p.name, "description": p.description} for p in hero.powers]
+            return jsonify({
+                "message": "HeroPower created successfully",
+                "hero": {"id": hero.id, "name": hero.name, "powers": powers}
+            }), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": f"Failed to create HeroPower. {str(e)}"}), 500
+
+class PowerResource(Resource):
+    def get(self, power_id):
+        power = Power.query.get(power_id)
+        if power:
+            return jsonify({"id": power.id, "name": power.name, "description": power.description})
+        else:
+            return jsonify({"error": f"Power with id {power_id} not found"}), 404
+
+class PowersResource(Resource):
+    def get(self):
+        powers = Power.query.all()
+        powers_data = [{"id": power.id, "name": power.name, "description": power.description} for power in powers]
+        return jsonify({"powers": powers_data})
 
 
-@app.route('/powers/<int:power_id>', methods=['GET'])
-def get_power(power_id):
-    power = Power.query.get(power_id)
-    if power:
-        return jsonify({"id": power.id, "name": power.name, "description": power.description})
-    else:
-        return jsonify({"error": f"Power with id {power_id} not found"})
-
-
-
-@app.route('/powers', methods=['GET'])
-def get_powers():
-    powers = Power.query.all()
-    powers_data = [{"id": power.id, "name": power.name, "description": power.description} for power in powers]
-    return jsonify({"powers": powers_data})
-
-
-
-    
+api.add_resource(HeroListResource, '/heroes')
+api.add_resource(HeroResource, '/heroes/<int:hero_id>')
+api.add_resource(HeroPowerResource, '/hero_powers')
+api.add_resource(PowerResource, '/powers/<int:power_id>')
+api.add_resource(PowersResource, '/powers')
 
 if __name__ == '__main__':
-    app.run(port=5555)
-
-
-
+    app.run(port=5555, debug=True)
